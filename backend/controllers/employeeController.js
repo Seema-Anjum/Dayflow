@@ -4,6 +4,7 @@ import { generateEmployeeId } from "../utils/generateEmployeeId.js";
 import { generateLoginId } from "../utils/generateLoginId.js";
 import { generateTemporaryPassword } from "../utils/generatePassword.js";
 
+// create employee
 export const createEmployee = async (req, res) => {
   try {
     const {
@@ -154,6 +155,141 @@ export const getEmployee = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch employee",
+    });
+  }
+};
+
+// update employee
+export const updateEmployee = async (req, res) => {
+  try {
+    const employee = await User.findById(req.params.id);
+
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    const isAdminOrHR =
+      req.user.role === "ADMIN" ||
+      req.user.role === "HR";
+
+    const isOwnProfile =
+      req.user._id.toString() === employee._id.toString();
+
+    if (!isAdminOrHR && !isOwnProfile) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own profile",
+      });
+    }
+
+    /*
+     * Employee can only change limited fields.
+     */
+    if (!isAdminOrHR) {
+      const allowedFields = [
+        "phone",
+        "address",
+        "profilePicture",
+      ];
+
+      const requestedFields = Object.keys(req.body);
+
+      const invalidFields = requestedFields.filter(
+        (field) => !allowedFields.includes(field)
+      );
+
+      if (invalidFields.length > 0) {
+        return res.status(403).json({
+          success: false,
+          message: `You cannot update: ${invalidFields.join(", ")}`,
+        });
+      }
+    }
+
+    /*
+     * Admin / HR can update broader employee information.
+     */
+    const allowedAdminFields = [
+      "name",
+      "phone",
+      "address",
+      "profilePicture",
+      "department",
+      "jobPosition",
+      "dateOfJoining",
+      "dateOfBirth",
+      "gender",
+      "location",
+      "manager",
+    ];
+
+    for (const field of allowedAdminFields) {
+      if (req.body[field] !== undefined) {
+        employee[field] = req.body[field];
+      }
+    }
+
+    await employee.save();
+
+    const updatedEmployee = await User.findById(employee._id)
+      .select("-password");
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      employee: updatedEmployee,
+    });
+  } catch (error) {
+    console.error("Update employee error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update employee",
+    });
+  }
+};
+
+// update employee status (activate/deactivate)
+export const updateEmployeeStatus = async (req, res) => {
+  try {
+    const { isActive } = req.body;
+
+    if (typeof isActive !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "isActive must be true or false",
+      });
+    }
+
+    const employee = await User.findById(req.params.id);
+
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    employee.isActive = isActive;
+
+    await employee.save();
+
+    res.status(200).json({
+      success: true,
+      message: isActive
+        ? "Employee activated successfully"
+        : "Employee deactivated successfully",
+      isActive: employee.isActive,
+    });
+  } catch (error) {
+    console.error("Update employee status error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update employee status",
     });
   }
 };

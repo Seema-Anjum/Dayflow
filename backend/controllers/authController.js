@@ -97,3 +97,57 @@ export const getMe = async (req, res) => {
     });
   }
 };
+
+// Change password controller 
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current and new password are required",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters",
+      });
+    }
+
+    const user = await User.findById(req.user._id)
+      .select("+password");
+
+    const isValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12);
+
+    user.passwordChangeRequired = false;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Change password error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to change password",
+    });
+  }
+};

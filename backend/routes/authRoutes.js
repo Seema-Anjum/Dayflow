@@ -2,6 +2,7 @@ import express from "express";
 import {
   login,
   getMe,
+  changePassword
 } from "../controllers/authController.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 
@@ -21,5 +22,8 @@ router.get("/admin-test", protect, authorizeRoles("ADMIN"),
     });
   }
 );
+
+// Change password route
+router.post("/change-password", protect, changePassword);
 
 export default router;
