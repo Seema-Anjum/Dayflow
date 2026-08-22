@@ -9,6 +9,7 @@ import employeeRoutes from "./routes/employeeRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
 import leaveRoutes from "./routes/leaveRoutes.js";
 import salaryRoutes from "./routes/salaryRoutes.js";
+import payrollRoutes from "./routes/payrollRoutes.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRoutes);
 app.use("/api/salaries", salaryRoutes);
+app.use("/api/payrolls", payrollRoutes);
 
 
 app.get("/api/health", (req, res) => {
