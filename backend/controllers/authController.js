@@ -151,3 +151,43 @@ export const changePassword = async (req, res) => {
     });
   }
 };
+
+
+export const resetEmployeePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+    const employee = await User.findById(req.params.id);
+
+    if (!employee || employee.role !== "EMPLOYEE") {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    employee.password = await bcrypt.hash(newPassword, 12);
+    employee.passwordChangeRequired = false;
+
+    await employee.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Employee password reset successfully",
+    });
+  } catch (error) {
+    console.error("Password reset error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to reset password",
+    });
+  }
+};

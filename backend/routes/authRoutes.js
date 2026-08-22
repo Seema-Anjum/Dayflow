@@ -2,7 +2,8 @@ import express from "express";
 import {
   login,
   getMe,
-  changePassword
+  changePassword,
+  resetEmployeePassword,
 } from "../controllers/authController.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 
@@ -25,5 +26,13 @@ router.get("/admin-test", protect, authorizeRoles("ADMIN"),
 
 // Change password route
 router.post("/change-password", protect, changePassword);
+
+// Reset employee password route
+router.put(
+  "/reset-password/:id",
+  protect,
+  authorizeRoles("ADMIN"),
+  resetEmployeePassword
+);
 
 export default router;
