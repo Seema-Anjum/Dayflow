@@ -1,4 +1,4 @@
-export const processPayroll = async (req, res) => {
+const processPayroll = async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.id);
 
@@ -33,3 +33,5 @@ export const processPayroll = async (req, res) => {
     });
   }
 };
+
+export default processPayroll;

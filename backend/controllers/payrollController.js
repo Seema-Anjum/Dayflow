@@ -26,9 +26,7 @@ export const generatePayroll = async (req, res) => {
       });
     }
 
-    const salary = await Salary.findOne({
-      userId,
-    });
+    const salary = await Salary.findOne({ userId });
 
     if (!salary) {
       return res.status(404).json({
@@ -37,11 +35,7 @@ export const generatePayroll = async (req, res) => {
       });
     }
 
-    const existingPayroll = await Payroll.findOne({
-      userId,
-      month,
-      year,
-    });
+    const existingPayroll = await Payroll.findOne({ userId, month, year });
 
     if (existingPayroll) {
       return res.status(409).json({
@@ -55,31 +49,17 @@ export const generatePayroll = async (req, res) => {
 
     const attendance = await Attendance.find({
       userId,
-      date: {
-        $gte: startDate,
-        $lte: endDate,
-      },
+      date: { $gte: startDate, $lte: endDate },
     });
 
     const workingDays = endDate.getDate();
 
-    const presentDays = attendance.filter(
-      (record) => record.status === "PRESENT"
-    ).length;
-
-    const leaveDays = attendance.filter(
-      (record) => record.status === "LEAVE"
-    ).length;
-
-    const halfDays = attendance.filter(
-      (record) => record.status === "HALF_DAY"
-    ).length;
+    const presentDays = attendance.filter((r) => r.status === "PRESENT").length;
+    const leaveDays = attendance.filter((r) => r.status === "LEAVE").length;
+    const halfDays = attendance.filter((r) => r.status === "HALF_DAY").length;
 
     const absentDays = Math.max(
-      workingDays -
-        presentDays -
-        leaveDays -
-        halfDays,
+      workingDays - presentDays - leaveDays - halfDays,
       0
     );
 
@@ -115,19 +95,15 @@ export const generatePayroll = async (req, res) => {
       userId,
       month,
       year,
-
       workingDays,
       presentDays,
       leaveDays,
       absentDays,
-
       basicSalary: salary.basicSalary,
       allowances: salaryCalculation.allowances,
       deductions: salaryCalculation.deductions,
-
       grossSalary: calculation.grossSalary,
       netSalary: calculation.netSalary,
-
       status: "DRAFT",
     });
 
@@ -138,7 +114,6 @@ export const generatePayroll = async (req, res) => {
     });
   } catch (error) {
     console.error("Generate payroll error:", error);
-
     res.status(500).json({
       success: false,
       message: "Failed to generate payroll",
@@ -148,9 +123,7 @@ export const generatePayroll = async (req, res) => {
 
 export const getMyPayroll = async (req, res) => {
   try {
-    const payroll = await Payroll.find({
-      userId: req.user._id,
-    }).sort({
+    const payroll = await Payroll.find({ userId: req.user._id }).sort({
       year: -1,
       month: -1,
     });
@@ -161,6 +134,7 @@ export const getMyPayroll = async (req, res) => {
       payroll,
     });
   } catch (error) {
+    console.error("Get my payroll error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch payroll",
@@ -171,14 +145,8 @@ export const getMyPayroll = async (req, res) => {
 export const getAllPayroll = async (req, res) => {
   try {
     const payroll = await Payroll.find()
-      .populate(
-        "userId",
-        "name employeeCode department jobPosition"
-      )
-      .sort({
-        year: -1,
-        month: -1,
-      });
+      .populate("userId", "name employeeCode department jobPosition")
+      .sort({ year: -1, month: -1 });
 
     res.status(200).json({
       success: true,
@@ -186,31 +154,7 @@ export const getAllPayroll = async (req, res) => {
       payroll,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch payroll",
-    });
-  }
-};
-
-export const getAllPayroll = async (req, res) => {
-  try {
-    const payroll = await Payroll.find()
-      .populate(
-        "userId",
-        "name employeeCode department jobPosition"
-      )
-      .sort({
-        year: -1,
-        month: -1,
-      });
-
-    res.status(200).json({
-      success: true,
-      count: payroll.length,
-      payroll,
-    });
-  } catch (error) {
+    console.error("Get all payroll error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch payroll",
@@ -247,6 +191,7 @@ export const processPayroll = async (req, res) => {
       payroll,
     });
   } catch (error) {
+    console.error("Process payroll error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to process payroll",

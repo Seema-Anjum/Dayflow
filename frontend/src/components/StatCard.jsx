@@ -1,23 +1,14 @@
-export default function StatCard({
-  title,
-  value,
-  description,
-}) {
+export default function StatCard({ title, value, description, icon: Icon }) {
   return (
-    <div className="bg-white border rounded-xl p-5">
-      <p className="text-sm text-gray-500">
-        {title}
-      </p>
-
-      <h2 className="text-3xl font-bold mt-2">
-        {value}
-      </h2>
-
-      {description && (
-        <p className="text-sm text-gray-400 mt-1">
-          {description}
-        </p>
-      )}
+    <div className="stat-card">
+      <div className="flex items-start justify-between gap-3 pl-2">
+        <div>
+          <p className="text-sm font-medium text-slate-500">{title}</p>
+          <h2 className="mt-2 text-2xl font-bold text-ink-900">{value}</h2>
+          {description && <p className="mt-1 text-xs text-slate-400">{description}</p>}
+        </div>
+        {Icon && <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><Icon size={19} /></span>}
+      </div>
     </div>
   );
 }

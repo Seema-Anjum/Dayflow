@@ -1,0 +1,2 @@
+import {X} from "lucide-react";
+export default function Modal({open,title,onClose,children}){if(!open)return null;return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"><div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white"><div className="flex justify-between border-b px-6 py-4"><h2 className="font-semibold">{title}</h2><button onClick={onClose}><X size={18}/></button></div><div className="p-6">{children}</div></div></div>}
